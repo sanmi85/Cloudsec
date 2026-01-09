@@ -20,12 +20,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      - name: Build, Tag, and Push to ECR
-        needs: build-and-push
-        run: |
-          IMAGE_URL=732799293349.dkr.ecr.us-east-2.amazonaws.com/yemipro:$GITHUB_RUN_NUMBER
-          docker build -t $IMAGE_URL .
-          docker push $IMAGE_URL
+      - name: Build, Tag, and Push to ECR 
+        run: | 
+            IMAGE_URL=654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr:$GITHUB_RUN_NUMBER
+            docker build -t $IMAGE_URL .
+            docker push $IMAGE_URL
+
+Deploy-ec2:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
+            docker pull 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
+            docker stop ecommerce-app || true
+            docker rm ecommerce-app || true
+            docker run -d --name cloudsec -p 80:80 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
+      
 
       
 
