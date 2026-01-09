@@ -39,8 +39,8 @@ jobs:
           script: |
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
             docker pull 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
-            docker stop ecommerce-app || true
-            docker rm ecommerce-app || true
+            docker stop cloudsec || true
+            docker rm cloudsec || true
             docker run -d --name cloudsec -p 80:80 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
       
 
