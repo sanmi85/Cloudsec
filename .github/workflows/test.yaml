@@ -8,23 +8,28 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: Build, Tag, and Push to ECR 
         run: | 
             IMAGE_URL=654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr:$GITHUB_RUN_NUMBER
+
             docker build -t $IMAGE_URL .
             docker push $IMAGE_URL
+
 
   Deploy-ec2:
     needs: build-and-push
@@ -38,12 +43,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
-            docker pull 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
-            docker stop cloudsec || true
-            docker rm cloudsec || true
-            docker run -d --name cloudsec -p 00:00 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr
-      
-
-      
-
-    
+            docker pull 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr-app:
+            docker stop Clousec || true
+            docker rm Clousec || true
+            docker run -d --name Clousec -p 80:80 654654245415.dkr.ecr.us-east-1.amazonaws.com/cloudecr-app:
