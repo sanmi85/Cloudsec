@@ -20,6 +20,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
+      - name: Build, Tag, and Push to ECR
+        needs: build-and-push
+        run: |
+          IMAGE_URL=732799293349.dkr.ecr.us-east-2.amazonaws.com/yemipro:$GITHUB_RUN_NUMBER
+          docker build -t $IMAGE_URL .
+          docker push $IMAGE_URL
+
       
 
     
